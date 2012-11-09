@@ -144,7 +144,6 @@ class Query(simpledb.Query):
 
                 if next_token is None:
                     break
-                from nose.tools import set_trace; set_trace()
                 response = self.domain.select(
                     self.to_expression(),
                     next_token=next_token.text,
