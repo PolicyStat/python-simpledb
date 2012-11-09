@@ -134,8 +134,26 @@ class Query(simpledb.Query):
 
     def _get_results(self):
         if self._result_cache is None:
-            self._result_cache = [self.domain.model.from_item(item) for item in
-                                  self.domain.select(self.to_expression())['items']]
+            # If there's a NextToken, we need to keep iterating
+            results = []
+            response = self.domain.select(self.to_expression())
+            items = response['items']
+            next_token = response['next_token']
+            while True:
+                results.extend([self.domain.model.from_item(item) for item in items])
+
+                if next_token is None:
+                    break
+                from nose.tools import set_trace; set_trace()
+                response = self.domain.select(
+                    self.to_expression(),
+                    next_token=next_token.text,
+                )
+                items = response['items']
+                next_token = response['next_token']
+
+            self._result_cache = results
+
         return self._result_cache
 
 
