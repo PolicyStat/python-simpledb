@@ -2,6 +2,7 @@ import urlparse
 import urllib
 import urllib2
 import time
+import ssl
 import hmac
 import base64
 try:
@@ -232,8 +233,18 @@ class SimpleDB(object):
         request.set_parameter('Version', self.service_version)
         request.sign_request(self.signature_method(), self.aws_key, self.aws_secret)
         req = urllib2.Request(request.url, headers)
-        response = urllib2.urlopen(req, request.to_postdata(), 10)
-        content = response.read()
+        max_retries = 10
+        retries = 0
+        while True:
+            try:
+                response = urllib2.urlopen(req, request.to_postdata(), max_retries)
+                content = response.read()
+                break
+            except (ssl.SSLError, urllib2.URLError), exc:
+                retries += 1
+                if retries >= max_retries:
+                    raise exc
+
         e = ET.fromstring(content)
 
         error = e.find('Errors/Error')
