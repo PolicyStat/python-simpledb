@@ -237,7 +237,7 @@ class SimpleDB(object):
         retries = 0
         while True:
             try:
-                response = urllib2.urlopen(req, request.to_postdata(), max_retries)
+                response = urllib2.urlopen(req, request.to_postdata(), 10)
                 content = response.read()
                 break
             except (ssl.SSLError, urllib2.URLError), exc:
